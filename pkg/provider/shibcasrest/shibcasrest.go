@@ -72,12 +72,12 @@ func (sc *Client) Authenticate(loginDetails *creds.LoginDetails) (string, error)
 
 	// We'll also need the `conversation` param from the service later on, so let's get it now
 	re := regexp.MustCompile(`\?conversation=(e\d{1,}s\d{1,})`)
-	shibConversation := re.FindStringSubmatch(casService)
+	shibConversation := re.FindStringSubmatch(casService)[1]
 
 	st, err := getST(tgt, casService)
-	fmt.Println(st)
+
 	// Make a call back to the IDP with the Service Ticket
-	shibCallbackURL := fmt.Sprintf("%s/idp/Authn/ExtCas?conversation=%s,entityId=%s,ticket=%s", loginDetails.URL, shibConversation, sc.idpAccount.AmazonWebservicesURN, st)
+	shibCallbackURL := fmt.Sprintf("%s/idp/Authn/ExtCas?conversation=%s&entityId=%s&ticket=%s", loginDetails.URL, shibConversation, sc.idpAccount.AmazonWebservicesURN, st)
 	idpCallbackResp, err := sc.client.Get(shibCallbackURL)
 	if err != nil {
 		return "", errors.Wrap(err, "Error calling back to Shibboleth with Service Ticket")
@@ -131,7 +131,6 @@ func extractSamlResponse(res *http.Response) (string, error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(string(body))
 	samlRgx := regexp.MustCompile(`name=\"SAMLResponse\" value=\"(.*?)\"/>`)
 	samlResponseValue := samlRgx.FindStringSubmatch(string(body))
 	return samlResponseValue[1], nil
