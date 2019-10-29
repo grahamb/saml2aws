@@ -68,7 +68,7 @@ func (sc *Client) Authenticate(loginDetails *creds.LoginDetails) (string, error)
 	}
 
 	// Get the CAS Service
-	casService := casURL.Query().Get("service")
+	casService := fmt.Sprintf("%s&entityId=%s", casURL.Query().Get("service"), sc.idpAccount.AmazonWebservicesURN)
 
 	// We'll also need the `conversation` param from the service later on, so let's get it now
 	re := regexp.MustCompile(`\?conversation=(e\d{1,}s\d{1,})`)
