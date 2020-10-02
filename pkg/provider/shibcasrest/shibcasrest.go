@@ -75,9 +75,9 @@ func (sc *Client) Authenticate(loginDetails *creds.LoginDetails) (string, error)
 	shibConversation := re.FindStringSubmatch(casService)[1]
 
 	st, err := getST(tgt, casService)
-
+	
 	// Make a call back to the IDP with the Service Ticket
-	shibCallbackURL := fmt.Sprintf("%s/idp/Authn/ExtCas?conversation=%s&entityId=%s&ticket=%s", loginDetails.URL, shibConversation, sc.idpAccount.AmazonWebservicesURN, st)
+	shibCallbackURL := fmt.Sprintf("%s/idp/Authn/External?conversation=%s&entityId=%s&ticket=%s", loginDetails.URL, shibConversation, sc.idpAccount.AmazonWebservicesURN, st)
 	idpCallbackResp, err := sc.client.Get(shibCallbackURL)
 	if err != nil {
 		return "", errors.Wrap(err, "Error calling back to Shibboleth with Service Ticket")
@@ -128,6 +128,7 @@ func getST(tgt string, service string) (string, error) {
 // copied from ../shibboleth.go
 func extractSamlResponse(res *http.Response) (string, error) {
 	body, err := ioutil.ReadAll(res.Body)
+	fmt.Println(string(body))
 	if err != nil {
 		log.Fatalln(err)
 	}
